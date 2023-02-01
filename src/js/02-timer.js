@@ -3,6 +3,13 @@ import 'flatpickr/dist/flatpickr.min.css';
 import Notiflix from 'notiflix';
 
 const btnStart = document.querySelector('[data-start]');
+const timerDays = document.querySelector('[data-days]');
+const timerHours = document.querySelector('[data-hours]');
+const timerMinutes = document.querySelector('[data-minutes]');
+const timerSeconds = document.querySelector('[data-seconds]');
+const input = document.getElementById('datetime-picker');
+
+btnStart.disabled = true;
 
 const options = {
   enableTime: true,
@@ -10,18 +17,53 @@ const options = {
   defaultDate: new Date(),
   minuteIncrement: 1,
   onClose(selectedDates) {
-    console.log(selectedDates[0]);
-    if (selectedDates[0] < options.defaultDate) {
-      //   alert('Please choose a date in the future');
+    if (selectedDates[0].getTime() < options.defaultDate) {
       Notiflix.Notify.failure('Please choose a date in the future');
-      btnStart.disabled = true;
-      return;
     } else {
-      Notiflix.Notify.success('Cool, choose the date');
+      Notiflix.Notify.success('Cool, you can press "Start"');
       btnStart.disabled = false;
+      const time = selectedDates[0].getTime();
+      btnStart.addEventListener('click', () => {
+        onGetTime(time);
+        btnStart.disabled = true;
+      });
     }
   },
 };
 
-const input = document.getElementById('datetime-picker');
 flatpickr(input, options);
+
+function onGetTime(time) {
+  let timerId = setInterval(() => {
+    const now = Date.now();
+    const leftTime = time - now;
+    convertMs(leftTime);
+  }, 1000);
+}
+
+function convertMs(ms) {
+  const second = 1000;
+  const minute = second * 60;
+  const hour = minute * 60;
+  const day = hour * 24;
+
+  const days = onChangeValue(Math.floor(ms / day));
+  const hours = onChangeValue(Math.floor((ms % day) / hour));
+  const minutes = onChangeValue(Math.floor(((ms % day) % hour) / minute));
+  const seconds = onChangeValue(
+    Math.floor((((ms % day) % hour) % minute) / second)
+  );
+
+  onUpdateClock({ days, hours, minutes, seconds });
+}
+
+function onUpdateClock({ days, hours, minutes, seconds }) {
+  timerDays.textContent = days;
+  timerHours.textContent = hours;
+  timerMinutes.textContent = minutes;
+  timerSeconds.textContent = seconds;
+}
+
+function onChangeValue(value) {
+  return String(value).padStart(2, 0);
+}
