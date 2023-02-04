@@ -18,7 +18,6 @@ const options = {
   defaultDate: new Date(),
   minuteIncrement: 1,
   onClose(selectedDates) {
-    console.log(options.defaultDate.getTime());
     if (selectedDates[0].getTime() < options.defaultDate) {
       Notiflix.Notify.failure('Please choose a date in the future');
       btnStart.disabled = true;
@@ -40,6 +39,11 @@ function onGetTime(time) {
   timerId = setInterval(() => {
     const now = Date.now();
     const leftTime = time - now;
+    if (leftTime <= 0) {
+      clearInterval(timerId);
+      Notiflix.Notify.success('Finish');
+      return;
+    }
     convertMs(leftTime);
   }, 1000);
 }
@@ -66,15 +70,14 @@ function onUpdateClock({ days, hours, minutes, seconds }) {
   timerMinutes.textContent = minutes;
   timerSeconds.textContent = seconds;
 
-  onStopInterval({ days, hours, minutes, seconds });
+  // onStopInterval({ days, hours, minutes, seconds });
 }
-
 function onChangeValue(value) {
   return String(value).padStart(2, 0);
 }
 
-function onStopInterval({ days, hours, minutes, seconds }) {
-  if (+days === 0 && +hours === 0 && +minutes === 0 && +seconds === 0) {
-    clearInterval(timerId);
-  }
-}
+// function onStopInterval({ days, hours, minutes, seconds }) {
+// if (+days === 0 && +hours === 0 && +minutes === 0 && +seconds === 0) {
+//   clearInterval(timerId);
+// }
+// }
